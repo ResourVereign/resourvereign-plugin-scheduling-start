@@ -9,40 +9,43 @@ import { adjust, parse } from 'compact-relative-time-notation';
 
 const schema = {
   properties: {
-    start: {
+    relativeTimeFromIntent: {
       type: PluginSchemaPropertyType.string,
     },
   },
 };
 
 type StartData = {
-  start: string;
+  relativeTimeFromIntent: string;
 };
 
-const initialize = async ({ start }: StartData, logger: Logger) => {
+const initialize = async ({ relativeTimeFromIntent }: StartData, logger: Logger) => {
   return {
     validate() {
       logger.debug(`Starting validation`);
-      return !!parse(start);
+      return !!parse(relativeTimeFromIntent);
     },
     async scheduleMiddleware(context: ScheduleMiddlewareContext, next: () => Promise<void>) {
       logger.debug(
-        `Intent date: ${context.intent.date}, candidate: ${context.date}, reason: ${context.reason}, start: ${start}`,
+        `Intent date: ${context.intent.date}, candidate: ${context.date}, reason: ${context.reason}, relativeTimeFromIntent: ${relativeTimeFromIntent}`,
       );
       if (context.reason !== SchedulingReason.intentCreation) {
         logger.debug(`Reason is not intent creation, nothing to do`);
         return await next();
       }
-      const limit = adjust(context.intent.date, start);
       if (!context.date) {
         logger.debug(`Date is undefined, nothing to do`);
         return await next();
       }
+
+      const limit = adjust(context.intent.date, relativeTimeFromIntent);
       if (context.date < limit) {
         context.date = limit;
-        logger.debug(`Date is before limit: ${limit}, adjusting to ${context.date}`);
+        logger.debug(
+          `Candidate date ${context.date} is before limit ${limit}, adjusting to ${context.date}`,
+        );
       } else {
-        logger.debug(`Date is after limit: ${limit}, not adjusting`);
+        logger.debug(`Candidate date ${context.date} is after limit ${limit}, not adjusting`);
       }
       return await next();
     },
