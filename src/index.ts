@@ -3,6 +3,7 @@ import { PluginSchemaPropertyType } from '@resourvereign/plugin-types/plugin/ind
 import {
   ScheduleMiddlewareContext,
   SchedulingPlugin,
+  SchedulingReason,
 } from '@resourvereign/plugin-types/plugin/scheduling.js';
 import { adjust, parse } from 'compact-relative-time-notation';
 
@@ -26,8 +27,12 @@ const initialize = async ({ start }: StartData, logger: Logger) => {
     },
     async scheduleMiddleware(context: ScheduleMiddlewareContext, next: () => Promise<void>) {
       logger.debug(
-        `Intent date: ${context.intent.date}, candidate: ${context.date}, start: ${start}`,
+        `Intent date: ${context.intent.date}, candidate: ${context.date}, reason: ${context.reason}, start: ${start}`,
       );
+      if (context.reason !== SchedulingReason.intentCreation) {
+        logger.debug(`Reason is not intent creation, nothing to do`);
+        return await next();
+      }
       const limit = adjust(context.intent.date, start);
       if (!context.date) {
         logger.debug(`Date is undefined, nothing to do`);
