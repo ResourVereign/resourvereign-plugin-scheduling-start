@@ -11,6 +11,11 @@ const schema: PluginSchema = {
   properties: {
     relativeTimeFromIntent: {
       type: 'string',
+      metadata: {
+        name: 'Do not start sooner than',
+        description:
+          'Compact relative time modifier to apply to the intent date. Adjust the first attempt date to be at soonest, the resulting date.',
+      },
     },
   },
 };
