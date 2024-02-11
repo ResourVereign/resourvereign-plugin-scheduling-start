@@ -59,5 +59,6 @@ const initialize = async ({ relativeTimeFromIntent }: StartData, logger: Logger)
 
 export default {
   schema,
-  initialize,
+  register: () => initialize,
+  unregister: () => {},
 } satisfies SchedulingPlugin<StartData>;
